@@ -1,8 +1,10 @@
+use aptos_api_types::MoveType;
 use reqwest::{Client};
 use crate::aptos_client_config::AptosClientConfig;
 use crate::queries::get_events::get_events::{EventsBoolExp, EventsOrderBy, GetEventsEvents, ResponseData, StringComparisonExp, Variables};
 use crate::queries::get_events::GetEvents;
 use graphql_client::{GraphQLQuery, Response};
+use move_core_types::account_address::AccountAddress;
 use crate::errors::AptosClientError;
 use crate::pagination_filter::{extract_pagination, PaginationFilter};
 
@@ -27,18 +29,18 @@ impl AptosClient {
 }
 
 impl AptosClient {
-    pub async fn get_account_events_by_event_type(&self, account_address: String, indexed_type: String, option: Option<PaginationFilter<Vec<EventsOrderBy>>>) -> Result<Vec<GetEventsEvents>, AptosClientError> {
+    pub async fn get_account_events_by_event_type(&self, account_address: AccountAddress, indexed_type: MoveType, option: Option<PaginationFilter<Vec<EventsOrderBy>>>) -> Result<Vec<GetEventsEvents>, AptosClientError> {
         let (offset, limit, order_by) = extract_pagination(option);
         let variables = Variables {
             where_condition: Some(EventsBoolExp {
                 and: Box::new(None),
                 not: Box::new(None),
                 or: Box::new(None),
-                account_address: Self::compare_equal_string(account_address),
+                account_address: Self::compare_equal_string(account_address.to_string()),
                 creation_number: None,
                 data: None,
                 event_index: None,
-                indexed_type: Self::compare_equal_string(indexed_type),
+                indexed_type: Self::compare_equal_string(indexed_type.to_string()),
                 sequence_number: None,
                 transaction_block_height: None,
                 transaction_version: None,
